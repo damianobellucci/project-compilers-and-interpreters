@@ -1,0 +1,8 @@
+/ast/
+/behavioural_analysis/
+/interpreter/
+/main/
+/parser/
+/spvm_ast/
+/spvm_parser/
+/util_analysis/

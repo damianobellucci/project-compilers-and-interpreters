@@ -1,0 +1,72 @@
+Problema:
+variabili per riferimento non vengono immesse
+
+
+
+
+Fatto la volta scorsa:
+hashmap aliasing implementata in SimplePlusCall, intorno riga 40.
+Questo codice da erorre:
+Not variable found. Variable either doesnt exist or has been deleted. Variable name: x
+Dovrebbe dare errore:
+Not variable found. Variable either doesnt exist or has been deleted. Variable name: a
+
+Quindi da errore prima del dovuto.
+L'erorre potrebbe essere dato da riga 25 (commento sopra in verde) in SimplePlusExpVar,
+in quanto non guardo se la variabile è passata per riferimento, lo devo fare.
+Però potrebbe anche essere che il problema stia nel fatto che non metto correttamente
+le variabili formali nel blocco della funzione (qui problema in simplePlusBlockFunctions).
+
+{	
+	void f(int var x){
+		delete x;
+	}
+	
+	int a=1;
+	f(a);
+	int b=a; /*deve dare errore*/
+}
+
+
+Da fare:
+-Sistemare errore spiegato precedentemente
+-In tutti i casi dove devo aggiornare o eliminare veriabili, 
+devo controllare se la variabile è passata per riferimento (per fare questo
+mi viene in aiuto il campo booleano "reference" delle variabili. 
+se è passata per riferimento allora dovrò andare a vedere come si chiama 
+la variabile nella hashmap di aliasing
+-verificare condizioni contorno di aliasing (tipo argomenti come espressioni e non variabili, ecc...)
+
+
+
+
+
+---------------------------------Da fare
+importante: in simplePlusBlock a linea 112 dove carico mappatura tra parametri formali e attuali,
+quando li vado a stampare poi sono uguali e non dovrebbero.
+Devo fare in modo che le variabili passate per riferimento vadano a trovare
+il valore assegnato negli altri ambienti. Come posso fare?
+Devo lavorare con lastFunctionId, parametri formali attuali e fare una hasmap che mappi le due cose
+(già messo campo lastFunctionArgumentsAliasing in environment)
+
+---------------------------------Pianificazione giornaliera
+
+---------------------------------Da finire
+
+---------------------------------Da fare
+(1 ora) controlli su parametri passati per riferimento
+(45 min) stampa riga di errore
+(15 min) fare test delete nelle funzioni
+?manca gestione delete in funzioni? esempio che aveva detto Nicolò, sta in appunti
+non ci possono essere argomenti con lo stesso nome nella dichiarazione di funzione
+controllo su eguaglianza di tipo tra parametri formali e attuali in SimplePlusCall invece che altrove
+fare controllo su numeri o booleani passati per riferimento invece che per variabili
+
+
+---------------------------------Da chiarire
+da decidere se checkSemantics ritorna una lista di errori oppure solo uno (il primo di ogni blocco)
+?quando chiamo funzione poi devo fare check se parametri sono stati inizializzati, ma non prima, inutile farlo quando faccio dec var?
+---------------------------------
+
+
+////test backup
