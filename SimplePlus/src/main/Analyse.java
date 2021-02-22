@@ -35,104 +35,75 @@ import spvm_parser.SPVMParser;
 public class Analyse {
 
 	public static void main(String[] args) {
-
 		String fileName = "test.spl";
-
 		try {
-
 			FileWriter errorWriter = null;
-
 			try {
-
-				// output file for errors
+				// creazione file per gli errori
 				errorWriter = new FileWriter("out.txt");
-
+				// creazione file per codice assembler
 				FileWriter codeWriter = new FileWriter("code.btc");
-
+				// creazione file di input per ANLTR
 				FileInputStream is = new FileInputStream(fileName);
 				ANTLRInputStream input = new ANTLRInputStream(is);
-
-				// create lexer
+				// creazione oggetto lexer, che prende in input il file con il codice sorgente da testare
 				SimplePlusLexer lexer = new SimplePlusLexer(input);
-
-				// remove default error listeners
+				//INIZIODUBBIO remove default error listeners 
 				lexer.removeErrorListeners();
-
 				// add new error listener
 				lexer.addErrorListener(new BaseErrorListener() {
-
 					@Override
 					public void syntaxError(Recognizer<?, ?> arg0, Object arg1, int arg2, int arg3, String arg4,
 							RecognitionException arg5) {
-
 						throw new LexerParserException(new String("line " + arg2 + ":" + arg3 + " " + arg4 + "\n"));
 					}
 				});
-
-				// create parser
+				//FINEDUBBIO
+				// creazione oggetto parser a partire dallo stream di tokens proveniente dal lexer
 				CommonTokenStream tokens = new CommonTokenStream(lexer);
 				SimplePlusParser parser = new SimplePlusParser(tokens);
-
 				// remove default error listeners
 				parser.removeErrorListeners();
-
 				// add new error listener
 				parser.addErrorListener(new BaseErrorListener() {
-
 					@Override
 					public void syntaxError(Recognizer<?, ?> arg0, Object arg1, int arg2, int arg3, String arg4,
 							RecognitionException arg5) {
-
 						throw new LexerParserException(new String("line " + arg2 + ":" + arg3 + " " + arg4 + "\n"));
 					}
 				});
-
 				// tell the parser to build the AST
 				parser.setBuildParseTree(true);
-
 				// build custom visitor
 				SimplePlusVisitorImpl visitor = new SimplePlusVisitorImpl();
-
 				SimplePlusBlock mainBlock = null;
-
 				// visit the root, this will recursively visit the whole tree
 				mainBlock = (SimplePlusBlock) visitor.visitBlock(parser.block());
-
 				System.out.println("Check lexical/syntactic succeded");
-
 				// check semantics
 				// give a fresh environment, no need to make it persist
 				List<SemanticError> errors = mainBlock.checkSemantics(new Environment());
-
 				// this means the semantic checker found some errors
 				if (errors.size() > 0) {
 					System.out.println("Check semantics FAILED");
 					System.out.println(errors.get(0).toString());
 				} else {
 					System.out.println("Check semantics succeded");
-
 					// controllo tipi
 					mainBlock.checkType(new Environment());
-				
-
 					System.out.println("Check type succeded");
-
 					codeWriter.close();
-
-					// interpretation();
+					interpretation();
 				}
 			} catch (LexerParserException e) {
 				System.out.println("Check lexical/syntactic FAILED");
 				errorWriter.write(e.toString());
-
 			} catch (TypeError e) {
 				System.out.println("Check type FAILED");
 				System.out.println(e.toString());
 			}
-
 			errorWriter.close();
 		} catch (IOException e) {
-
 			e.printStackTrace();
 		}
 	}
